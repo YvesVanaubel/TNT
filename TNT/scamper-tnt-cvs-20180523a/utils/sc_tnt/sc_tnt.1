@@ -1,0 +1,164 @@
+.\"
+.\" sc_tnt.1
+.\"
+.\" Author: Yves Vanaubel <yves.vanaubel@uliege.be>
+.\"
+.\" Copyright (c) 2017-2018 Yves Vanaubel
+.\"
+.\" $Id: sc_tnt.1,v 5.0 2018/05/23 16:54:34 mjl Exp $
+.\"
+.\"  nroff -man sc_tnt.1
+.\"  groff -man -Tascii sc_tnt.1 | man2html -title sc_tnt.1
+.\"
+.Dd May 23, 2018
+.Dt SC_TNT 1
+.Os
+.Sh NAME
+.Nm sc_tnt
+.Nd run or dump traces with MPLS tunnel discovery.
+.Sh SYNOPSIS
+.Nm
+.Bk -words
+.Op Fl ?Db
+.Op Fl a Ar addressfile
+.Op Fl c Ar pingcount
+.Op Fl f Ar frplathresh
+.Op Fl i Ar dst
+.Op Fl l Ar logfile
+.Op Fl m Ar method
+.Op Fl o Ar outputfile
+.Op Fl p Ar port
+.Op Fl r Ar rtlathresh
+.Op Fl s Ar startttl
+.Op Fl U Ar unix
+.Ek
+.Pp
+.Nm
+.Bk -words
+.Op Fl v
+.Op Fl d Ar dump
+.Ek
+.Sh DESCRIPTION
+The
+.Nm
+utility provides the ability to connect to a running
+.Xr scamper 1
+instance and use it to reveal MPLS tunnels on the paths to destinations.
+.Pp
+.Nm
+operates in two distinct modes: trace collection, and trace dump.
+.Pp
+In the trace collection mode,
+.Nm
+uses paris-traceroute with ICMP-echo or UDP probes to trace the path towards 
+each destination. Each trace is analyzed to reveal each type of MPLS tunnel (explicit, 
+implicit, opaque or invisible). Other traceroutes and pings may be run to discover hidden MPLS
+tunnels on the paths. Each hop on the paths is fingerprinted (reply TTLs for time-exceeded 
+and echo-reply messages). Note that only the first invisible tunnel is revealed on each path.
+.Pp
+In trace dump mode,
+.Nm
+dumps the content of a TNT warts file on the standard output.
+.Pp
+The supported options to
+.Nm
+are as follows:
+.Bl -tag -width Ds
+.It Fl ?
+prints a list of command line options and a synopsis of each.
+.It Fl D
+causes
+.Nm
+to detach and become a daemon.
+.It Fl b
+forces
+.Nm
+to work in brute force, bypassing the triggers for the revelation attempts.
+.It Fl a Ar addressfile
+specifies the name of a file containing the destination IP addresses.
+.It Fl c Ar pingcount
+specifies the number of pings to run to each discovered hop for fingerprinting 
+accuracy. Default is 1.
+.It Fl f Ar frplathresh
+specifies a striclty positve threshold value for the FRPLA trigger.
+Default is 3.
+.It Fl i Ar dst
+specifies a unique destination IP address.
+.It Fl l Ar logfile
+specifies the name of a file to log the progress.
+.It Fl m Ar method
+specifies the probing protocol for traceroute (imcp-paris or udp-paris).
+Default is icmp-paris.
+.It Fl o Ar outputfile
+specifies the name of the output file to be written during the data collection
+phase. The output file will be in the
+.Xr warts 5
+format.
+.It Fl p Ar port
+specifies the port on the local host where
+.Xr scamper 1
+is accepting control socket connections.
+.It Fl r Ar rtlathresh
+specifies a striclty positve threshold value for the RTLA trigger.
+Default is 1.
+.It Fl s Ar startttl
+specifies the initial TTL to use when running traceroutes to the different
+destinations. Default is 1.
+.It Fl U Ar unix
+specifies the name of a unix domain socket where a local
+.Xr scamper 1
+instance is accepting control socket connections.
+.It Fl v
+asks
+.Nm
+to write in verbose mode during a warts dump (tunnel discovery attempts
+are displayed).
+.It Fl d Ar dump
+specifies a dump mode. A value of 1 allows to dump a warts file displaying
+MPLS tunnels.
+.Sh EXAMPLES
+The command:
+.Pp
+.in +.3i
+sc_tnt -a destinations.txt -m udp-paris -o out.warts -p 5001
+.in -.3i
+.Pp
+will trace in udp-paris mode each destination in the file destination.txt and discover MPLS tunnels on the different paths. The traces are outputted in the file out.warts. A scamper daemon should listen on port 5001.
+.Pp
+The command:
+.Pp
+.in +.3i
+sc_tnt -i 137.97.22.85 -o out.warts -p 5001
+.in -.3i
+.Pp
+will trace in icmp-paris mode the destination 137.97.22.85 and discover MPLS tunnels on the path. The output trace is written in the file out.warts. A scamper daemon should listen on port 5001.
+.Pp
+The command:
+.Pp
+.in +.3i
+sc_tnt -d 1 out.warts
+.in -.3i
+.Pp
+will display the content of the file out.warts on the standard output.
+.Pp
+.Sh SEE ALSO
+.Xr scamper 1
+.Rs
+.%A "Y. Vanaubel"
+.%A "P. Merindol"
+.%A "J.-J. Pansiot"
+.%A "B. Donnet"
+.%T "Through the Wormhole: Tracking Invisible MPLS Tunnels"
+.%O "Proceedings of the 2017 Conference on Internet Measurement Conference"
+.Re
+.Rs
+.%A "Y. Vanaubel"
+.%A "J.-J. Pansiot"
+.%A "P. Merindol"
+.%A "B. Donnet"
+.%T "Network fingerprinting: TTL-based router signatures"
+.%O "Proceedings of the 2013 Conference on Internet Measurement Conference, 369-376"
+.Re
+.Sh AUTHORS
+.Nm
+was written by Yves Vanaubel <http://www.montefiore.ulg.ac.be/~bdonnet/mpls/contact.html>.
