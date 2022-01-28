@@ -47,7 +47,7 @@ static const char rcsid[] =
 
 static char *hop_tostr(scamper_trace_hop_t *hop)
 {
-  char buf[512], tmp[128];
+  char buf[1024], tmp[128];
   scamper_icmpext_t *ie;
   size_t off = 0;
   uint32_t u32;
